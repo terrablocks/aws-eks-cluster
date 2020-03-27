@@ -33,3 +33,8 @@ This terraform module will deploy the following services:
 - `terraform plan` - get detailed view of resources that will be created, deleted or replaced
 - `terraform apply -auto-approve` - deploy the template without confirmation (non-interactive mode)
 - `terraform destroy -auto-approve` - terminate all the resources created using this template without confirmation (non-interactive mode)
+
+
+## Steps to generate initial kubeconfig
+- Run `aws --version` to ensure you have atleast 1.18.17 version installed
+- Run `aws eks --region region-code update-kubeconfig --name cluster-name` to generate initial kubeconfig file. Optionally, you can even pass --profile to use custom AWS profile for authentication and --kubeconfig to generate file with custom name and path. **Note:** You need to run this command using the same user identity using which the cluster was created.

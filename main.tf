@@ -27,6 +27,10 @@ resource "aws_iam_role_policy_attachment" "eks_service_policy" {
   role       = aws_iam_role.eks_role.name
 }
 
+resource "aws_kms_key" "eks_key" {
+  description = "Key to encrypt k8s secrets"
+}
+
 resource "aws_eks_cluster" "eks_cluster" {
   version  = var.eks_version == "" ? null : var.eks_version
   name     = var.cluster_name
@@ -40,6 +44,13 @@ resource "aws_eks_cluster" "eks_cluster" {
   }
 
   enabled_cluster_log_types = var.eks_log_types
+
+  encryption_config {
+    provider {
+      key_arn = aws_kms_key.eks_key.arn
+    }
+    resources = ["secrets"]
+  }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
   # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
