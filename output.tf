@@ -1,19 +1,19 @@
-output "eks_endpoint" {
+output "endpoint" {
   value = aws_eks_cluster.eks_cluster.endpoint
 }
 
-output "eks_id" {
+output "id" {
   value = aws_eks_cluster.eks_cluster.id
 }
 
-output "eks_arn" {
+output "arn" {
   value = aws_eks_cluster.eks_cluster.arn
 }
 
-output "eks_ca_data" {
+output "ca_data" {
   value = aws_eks_cluster.eks_cluster.certificate_authority.0.data
 }
 
-output "eks_sg_id" {
+output "sg_id" {
   value = aws_eks_cluster.eks_cluster.vpc_config.0.cluster_security_group_id
 }

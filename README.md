@@ -22,11 +22,11 @@ This terraform module will deploy the following services:
 ## Outputs
 | Parameter           | Type   | Description               |
 |---------------------|--------|---------------------------|
-| eks_endpoint           | string | Endpoint of EKS cluster            |
-| eks_id | string | Name of EKS cluster       |
-| eks_arn    | string | ARN of EKS cluster  |
-| eks_ca_data           | string | Certificate data of EKS cluster in base64 format            |
-| eks_sg_id | string | ID of security group created and attached to EKS cluster      |
+| endpoint           | string | Endpoint of EKS cluster            |
+| id | string | Name of EKS cluster       |
+| arn    | string | ARN of EKS cluster  |
+| ca_data           | string | Certificate data of EKS cluster in base64 format            |
+| sg_id | string | ID of security group created and attached to EKS cluster      |
 
 ## Deployment
 - `terraform init` - download plugins required to deploy resources
