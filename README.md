@@ -29,7 +29,10 @@ This terraform module will deploy the following services:
 | id | string | Name of EKS cluster       |
 | arn    | string | ARN of EKS cluster  |
 | ca_data           | string | Certificate data of EKS cluster in base64 format            |
+| oidc_url           | string | Issuer URL for the OpenID Connect identity provider            |
 | sg_id | string | ID of security group created and attached to EKS cluster      |
+| role_name | string | Name of IAM role created for EKS cluster      |
+| status | string | Status of EKS cluster. Valid values: CREATING, ACTIVE, DELETING, FAILED      |
 
 ## Deployment
 - `terraform init` - download plugins required to deploy resources
