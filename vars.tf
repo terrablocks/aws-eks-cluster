@@ -4,11 +4,11 @@ variable "cluster_name" {}
 
 variable "subnet_ids" {}
 
-variable "deletion_window_in_days" {
+variable "kms_deletion_window_in_days" {
   default = 30
 }
 
-variable "enable_key_rotation" {
+variable "kms_enable_key_rotation" {
   default = false
 }
 

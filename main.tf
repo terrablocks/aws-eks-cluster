@@ -29,8 +29,8 @@ resource "aws_iam_role_policy_attachment" "eks_service_policy" {
 
 resource "aws_kms_key" "eks_key" {
   description = "Key to encrypt k8s secrets"
-  deletion_window_in_days = var.deletion_window_in_days
-  enable_key_rotation = var.enable_key_rotation
+  deletion_window_in_days = var.kms_deletion_window_in_days
+  enable_key_rotation = var.kms_enable_key_rotation
 }
 
 resource "aws_kms_alias" "eks_key_alias" {
