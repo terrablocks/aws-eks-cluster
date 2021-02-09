@@ -25,13 +25,18 @@ variable "enable_public_access" {
 }
 
 variable "public_cidrs" {
-  type = list
+  type = list(any)
   default = [
     "0.0.0.0/0"
   ]
 }
 
 variable "eks_log_types" {
-  type    = list
+  type    = list(any)
   default = []
+}
+
+variable "tags" {
+  type    = map(any)
+  default = {}
 }
