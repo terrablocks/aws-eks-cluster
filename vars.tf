@@ -36,6 +36,10 @@ variable "eks_log_types" {
   default = []
 }
 
+variable "create_oidc_provider" {
+  default = true
+}
+
 variable "tags" {
   type    = map(any)
   default = {}

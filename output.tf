@@ -29,3 +29,7 @@ output "role_name" {
 output "status" {
   value = aws_eks_cluster.eks_cluster.status
 }
+
+output "oidc_provider_arn" {
+  value = var.create_oidc_provider ? join(",", aws_iam_openid_connect_provider.eks_oidc.*.arn) : null
+}

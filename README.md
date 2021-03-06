@@ -6,6 +6,7 @@ This terraform module will deploy the following services:
 - IAM Role
 - CloudWatch Log Group (Optional)
 - KMS Key
+- OIDC Provider (Optional)
 
 ## Licence:
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -36,6 +37,7 @@ module "eks_cluster" {
 | enable_public_access  | boolean | Whether to allow EKS cluster to be accessed publicly                                                                                                                 | false         | N        |
 | public_cidrs          | list    | List of CIDRs to be whitelisted if allowing public access                                                                                                            | ["0.0.0.0/0"] | N        |
 | eks_log_types         | list    | List of logs to be enabled for EKS cluster. These logs will be stored in CloudWatch Log Group. Valid values: api, audit, authenticator, controllerManager, scheduler |               | N        |
+| create_oidc_provider     | boolean    | Whether to create custom IAM OIDC provider for EKS cluster  | true    | N        |
 | tags         | map    | Map of tags to associate with EKS cluster |               | N        |
 
 ## Outputs
@@ -49,6 +51,7 @@ module "eks_cluster" {
 | sg_id | string | ID of security group created and attached to EKS cluster      |
 | role_name | string | Name of IAM role created for EKS cluster      |
 | status | string | Status of EKS cluster. Valid values: CREATING, ACTIVE, DELETING, FAILED      |
+| oidc_provider_arn | string | ARN of IAM OIDC provider for EKS cluster      |
 
 ## Deployment
 - `terraform init` - download plugins required to deploy resources
