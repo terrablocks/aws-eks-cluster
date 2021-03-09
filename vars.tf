@@ -37,7 +37,7 @@ variable "eks_log_types" {
 }
 
 variable "create_oidc_provider" {
-  default = true
+  default = false
 }
 
 variable "security_group_ids" {
