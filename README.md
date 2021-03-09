@@ -38,6 +38,7 @@ module "eks_cluster" {
 | public_cidrs          | list    | List of CIDRs to be whitelisted if allowing public access                                                                                                            | ["0.0.0.0/0"] | N        |
 | eks_log_types         | list    | List of logs to be enabled for EKS cluster. These logs will be stored in CloudWatch Log Group. Valid values: api, audit, authenticator, controllerManager, scheduler |               | N        |
 | create_oidc_provider     | boolean    | Whether to create custom IAM OIDC provider for EKS cluster  | true    | N        |
+| security_group_ids     | list    | List of security group IDs to associate with EKS cluster  |    | N        |
 | tags         | map    | Map of tags to associate with EKS cluster |               | N        |
 
 ## Outputs

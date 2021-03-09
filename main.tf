@@ -48,6 +48,7 @@ resource "aws_eks_cluster" "eks_cluster" {
     endpoint_private_access = var.enable_private_access
     endpoint_public_access  = var.enable_public_access
     public_access_cidrs     = var.enable_public_access == true ? var.public_cidrs : null
+    security_group_ids      = var.security_group_ids
   }
 
   enabled_cluster_log_types = var.eks_log_types

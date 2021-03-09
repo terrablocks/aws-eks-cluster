@@ -40,6 +40,11 @@ variable "create_oidc_provider" {
   default = true
 }
 
+variable "security_group_ids" {
+  type    = list(any)
+  default = null
+}
+
 variable "tags" {
   type    = map(any)
   default = {}
