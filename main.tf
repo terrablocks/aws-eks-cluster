@@ -28,6 +28,7 @@ resource "aws_iam_role_policy_attachment" "eks_service_policy" {
 }
 
 resource "aws_kms_key" "eks_key" {
+  # checkov:skip=CKV_AWS_7: Enabling key rotation is dependant on user
   description             = "Key to encrypt k8s secrets"
   deletion_window_in_days = var.kms_deletion_window_in_days
   enable_key_rotation     = var.kms_enable_key_rotation
@@ -39,6 +40,9 @@ resource "aws_kms_alias" "eks_key_alias" {
 }
 
 resource "aws_eks_cluster" "eks_cluster" {
+  # checkov:skip=CKV_AWS_37: Enabling control plane is dependant on user
+  # checkov:skip=CKV_AWS_38: Restricting public access to EKS enpoint is dependant on user
+  # checkov:skip=CKV_AWS_39: Disabling public access to EKS enpoint is dependant on user
   version  = var.eks_version == "" ? null : var.eks_version
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_role.arn

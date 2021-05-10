@@ -1,5 +1,7 @@
 # Launch an EKS Cluster
 
+![License](https://img.shields.io/github/license/terrablocks/aws-eks-cluster?style=for-the-badge) ![Tests](https://img.shields.io/github/workflow/status/terrablocks/aws-eks-cluster/tests/master?label=Test&style=for-the-badge) ![Checkov](https://img.shields.io/github/workflow/status/terrablocks/aws-eks-cluster/checkov/master?label=Checkov&style=for-the-badge) ![Commit](https://img.shields.io/github/last-commit/terrablocks/aws-eks-cluster?style=for-the-badge) ![Release](https://img.shields.io/github/v/release/terrablocks/aws-eks-cluster?style=for-the-badge)
+
 This terraform module will deploy the following services:
 - EKS Cluster
 - Security Group
@@ -8,59 +10,57 @@ This terraform module will deploy the following services:
 - KMS Key
 - OIDC Provider (Optional)
 
-## Licence:
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-
-MIT Licence. See [Licence](LICENCE) for full details.
-
-# Usage Instructions:
+# Usage Instructions
 ## Example
 ```terraform
 module "eks_cluster" {
   source = "github.com/terrablocks/aws-eks-cluster.git"
 
-  vpc_id       = ""
-  subnet_ids   = []
+  vpc_id       = "vpc-xxxx"
+  subnet_ids   = ["subnet-xxxx", "subnet-xxxx"]
   cluster_name = "eks-cluster"
 }
 ```
-## Variables
-| Parameter             | Type    | Description                                                                                                                                                          | Default       | Required |
-|-----------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|----------|
-| vpc_id                | string  | ID of VPC for launching EKS cluster                                                                                                                                  |               | Y        |
-| subnet_ids            | list    | List of subnet ids to be used for launching EKS cluster                                                                                                              |               | Y        |
-| kms_deletion_window_in_days          | number  | Days after which KMS key to be deleted                                                                      | 30              | N        |
-| kms_enable_key_rotation          | boolean  | Whether to enable automatic key rotation                                                                                                                                                   | false              | N        |
-| cluster_name          | string  | Name of EKS cluster                                                                                                                                                  |               | Y        |
-| eks_version           | string  | Version to EKS cluster                                                                                                                                               |               | N        |
-| enable_private_access | boolean | Whether to enable private access of EKS cluster                                                                                                                      | true          | N        |
-| enable_public_access  | boolean | Whether to allow EKS cluster to be accessed publicly                                                                                                                 | false         | N        |
-| public_cidrs          | list    | List of CIDRs to be whitelisted if allowing public access                                                                                                            | ["0.0.0.0/0"] | N        |
-| eks_log_types         | list    | List of logs to be enabled for EKS cluster. These logs will be stored in CloudWatch Log Group. Valid values: api, audit, authenticator, controllerManager, scheduler |               | N        |
-| create_oidc_provider     | boolean    | Whether to create custom IAM OIDC provider for EKS cluster  | false    | N        |
-| security_group_ids     | list    | List of security group IDs to associate with EKS cluster  |    | N        |
-| tags         | map    | Map of tags to associate with EKS cluster |               | N        |
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 0.13 |
+| aws | >= 3.37.0 |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| vpc_id | ID of VPC for launching EKS cluster | `string` | n/a | yes |
+| cluster_name | Name for EKS cluster | `string` | n/a | yes |
+| subnet_ids | List of subnet ids to be used for launching EKS cluster | `list(string)` | n/a | yes |
+| kms_deletion_window_in_days | Days after which KMS key to be deleted | `number` | `30` | no |
+| kms_enable_key_rotation | Whether to enable automatic key rotation | `bool` | `false` | no |
+| eks_version | Version of EKS cluster | `string` | `""` | no |
+| enable_private_access | Whether to enable private access of EKS cluster | `bool` | `true` | no |
+| enable_public_access | Whether to allow EKS cluster to be accessed publicly | `bool` | `false` | no |
+| public_cidrs | List of CIDRs to be whitelisted if allowing public access | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
+| eks_log_types | List of logs to be enabled for EKS cluster. These logs will be stored in CloudWatch Log Group. **Valid values:** api, audit, authenticator, controllerManager, scheduler | `list(string)` | `[]` | no |
+| create_oidc_provider | Whether to create custom IAM OIDC provider for EKS cluster | `bool` | `false` | no |
+| security_group_ids | List of security group IDs to associate with EKS cluster | `list(string)` | `null` | no |
+| tags | Map of key value pair to associate with EKS cluster | `map(string)` | `{}` | no |
 
 ## Outputs
-| Parameter           | Type   | Description               |
-|---------------------|--------|---------------------------|
-| endpoint           | string | Endpoint of EKS cluster            |
-| id | string | Name of EKS cluster       |
-| arn    | string | ARN of EKS cluster  |
-| ca_data           | string | Certificate data of EKS cluster in base64 format            |
-| oidc_url           | string | Issuer URL for the OpenID Connect identity provider            |
-| sg_id | string | ID of security group created and attached to EKS cluster      |
-| role_name | string | Name of IAM role created for EKS cluster      |
-| status | string | Status of EKS cluster. Valid values: CREATING, ACTIVE, DELETING, FAILED      |
-| oidc_provider_arn | string | ARN of IAM OIDC provider for EKS cluster      |
 
-## Deployment
-- `terraform init` - download plugins required to deploy resources
-- `terraform plan` - get detailed view of resources that will be created, deleted or replaced
-- `terraform apply -auto-approve` - deploy the template without confirmation (non-interactive mode)
-- `terraform destroy -auto-approve` - terminate all the resources created using this template without confirmation (non-interactive mode)
-
+| Name | Description |
+|------|-------------|
+| endpoint | Endpoint of EKS cluster |
+| id | Name of EKS cluster |
+| arn | ARN of EKS cluster |
+| ca_data | Certificate data of EKS cluster in base64 format |
+| oidc_url | Issuer URL for the OpenID Connect identity provider |
+| sg_id | ID of security group created and attached to EKS cluster |
+| role_name | Name of IAM role created for EKS cluster |
+| status | Status of EKS cluster. Valid values: CREATING, ACTIVE, DELETING, FAILED |
+| oidc_provider_arn | ARN of IAM OIDC provider for EKS cluster |
 
 ## Steps to generate initial kubeconfig
 - Run `aws --version` to ensure you have atleast 1.18.17 version installed
-- Run `aws eks --region region-code update-kubeconfig --name cluster-name` to generate initial kubeconfig file. Optionally, you can even pass --profile to use custom AWS profile for authentication and --kubeconfig to generate file with custom name and path. **Note:** You need to run this command using the same user identity using which the cluster was created.
+- Run `aws eks --region region-code update-kubeconfig --name cluster-name` to generate initial kubeconfig file. Optionally, you can even pass --profile to use custom AWS profile for authentication and --kubeconfig to generate file with custom name and path. **Note:** You need to run this command using the same user identity using which the cluster was created
