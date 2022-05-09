@@ -33,6 +33,21 @@ output "role_name" {
   description = "Name of IAM role created for EKS cluster"
 }
 
+output "role_arn" {
+  value       = aws_iam_role.eks_role.arn
+  description = "ARN of IAM role created for EKS cluster"
+}
+
+output "kms_key_arn" {
+  value       = aws_kms_key.eks_key.arn
+  description = "ARN of KMS key created for encrypting K8s secrets"
+}
+
+output "kms_key_alias" {
+  value       = aws_kms_alias.eks_key_alias.name
+  description = "Alias of KMS key created for encrypting K8s secrets"
+}
+
 output "status" {
   value       = aws_eks_cluster.eks_cluster.status
   description = "Status of EKS cluster. Valid values: CREATING, ACTIVE, DELETING, FAILED"

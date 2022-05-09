@@ -58,6 +58,9 @@ module "eks_cluster" {
 | oidc_url | Issuer URL for the OpenID Connect identity provider |
 | sg_id | ID of security group created and attached to EKS cluster |
 | role_name | Name of IAM role created for EKS cluster |
+| role_arn | ARN of IAM role created for EKS cluster |
+| kms_key_arn | ARN of KMS key created for encrypting K8s secrets |
+| kms_key_alias | Alias of KMS key created for encrypting K8s secrets |
 | status | Status of EKS cluster. Valid values: CREATING, ACTIVE, DELETING, FAILED |
 | oidc_provider_arn | ARN of IAM OIDC provider for EKS cluster |
 
