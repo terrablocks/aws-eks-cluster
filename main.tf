@@ -15,6 +15,8 @@ resource "aws_iam_role" "eks_role" {
   ]
 }
 POLICY
+
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy" "eks_cluster_kms_key" {
@@ -52,6 +54,7 @@ resource "aws_kms_key" "eks_key" {
   description             = "Key to encrypt k8s secrets"
   deletion_window_in_days = var.kms_deletion_window_in_days
   enable_key_rotation     = var.kms_enable_key_rotation
+  tags                    = var.tags
 }
 
 resource "aws_kms_alias" "eks_key_alias" {
@@ -109,4 +112,6 @@ resource "aws_iam_openid_connect_provider" "eks_oidc" {
   thumbprint_list = [
     data.tls_certificate.eks_oidc.certificates.0.sha1_fingerprint
   ]
+
+  tags = var.tags
 }
