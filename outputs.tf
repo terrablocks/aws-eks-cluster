@@ -14,17 +14,17 @@ output "arn" {
 }
 
 output "ca_data" {
-  value       = aws_eks_cluster.eks_cluster.certificate_authority.0.data
+  value       = aws_eks_cluster.eks_cluster.certificate_authority[0].data
   description = "Certificate data of EKS cluster in base64 format"
 }
 
 output "oidc_url" {
-  value       = aws_eks_cluster.eks_cluster.identity.0.oidc.0.issuer
+  value       = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
   description = "Issuer URL for the OpenID Connect identity provider"
 }
 
 output "sg_id" {
-  value       = aws_eks_cluster.eks_cluster.vpc_config.0.cluster_security_group_id
+  value       = aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id
   description = "ID of security group created and attached to EKS cluster"
 }
 
@@ -54,6 +54,6 @@ output "status" {
 }
 
 output "oidc_provider_arn" {
-  value       = var.create_oidc_provider ? join(",", aws_iam_openid_connect_provider.eks_oidc.*.arn) : null
+  value       = var.create_oidc_provider ? join(",", aws_iam_openid_connect_provider.eks_oidc[*].arn) : null
   description = "ARN of IAM OIDC provider for EKS cluster"
 }

@@ -51,6 +51,7 @@ resource "aws_iam_role_policy_attachment" "eks_service_policy" {
 
 resource "aws_kms_key" "eks_key" {
   # checkov:skip=CKV_AWS_7: Enabling key rotation is dependant on user
+  # checkov:skip=CKV2_AWS_64: Key policy not required
   description             = "Key to encrypt k8s secrets"
   deletion_window_in_days = var.kms_deletion_window_in_days
   enable_key_rotation     = var.kms_enable_key_rotation
@@ -98,19 +99,19 @@ resource "aws_eks_cluster" "eks_cluster" {
 }
 
 data "tls_certificate" "eks_oidc" {
-  url = aws_eks_cluster.eks_cluster.identity.0.oidc.0.issuer
+  url = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 }
 
 resource "aws_iam_openid_connect_provider" "eks_oidc" {
   count = var.create_oidc_provider ? 1 : 0
-  url   = aws_eks_cluster.eks_cluster.identity.0.oidc.0.issuer
+  url   = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 
   client_id_list = [
     "sts.amazonaws.com",
   ]
 
   thumbprint_list = [
-    data.tls_certificate.eks_oidc.certificates.0.sha1_fingerprint
+    data.tls_certificate.eks_oidc.certificates[0].sha1_fingerprint
   ]
 
   tags = var.tags
