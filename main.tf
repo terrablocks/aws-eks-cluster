@@ -83,13 +83,13 @@ resource "aws_iam_role" "eks_node_role" {
 resource "aws_iam_role_policy_attachment" "eks_node_role_minimal_policy" {
   count      = var.enable_eks_auto_mode && var.eks_auto_mode_node_role_arn == "" ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodeMinimalPolicy"
-  role       = aws_iam_role.eks_node_role[*].name
+  role       = aws_iam_role.eks_node_role[0].name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_node_role_ecr_policy" {
   count      = var.enable_eks_auto_mode && var.eks_auto_mode_node_role_arn == "" ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly"
-  role       = aws_iam_role.eks_node_role[*].name
+  role       = aws_iam_role.eks_node_role[0].name
 }
 
 resource "aws_kms_key" "eks_key" {
@@ -134,7 +134,7 @@ resource "aws_eks_cluster" "eks_cluster" {
     content {
       enabled       = var.enable_eks_auto_mode
       node_pools    = var.eks_auto_mode_node_pools
-      node_role_arn = var.enable_eks_auto_mode && var.eks_auto_mode_node_role_arn == "" ? aws_iam_role.eks_node_role[*].arn : var.eks_auto_mode_node_role_arn
+      node_role_arn = var.enable_eks_auto_mode && var.eks_auto_mode_node_role_arn == "" ? aws_iam_role.eks_node_role[0].arn : var.eks_auto_mode_node_role_arn
     }
   }
 
