@@ -29,12 +29,12 @@ output "sg_id" {
 }
 
 output "role_name" {
-  value       = aws_iam_role.eks_role.name
+  value       = aws_iam_role.eks_cluster_role.name
   description = "Name of IAM role created for EKS cluster"
 }
 
 output "role_arn" {
-  value       = aws_iam_role.eks_role.arn
+  value       = aws_iam_role.eks_cluster_role.arn
   description = "ARN of IAM role created for EKS cluster"
 }
 

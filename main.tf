@@ -1,27 +1,41 @@
-resource "aws_iam_role" "eks_role" {
-  name = "${var.cluster_name}-eks-cluster-role"
+resource "aws_iam_role" "eks_cluster_role" {
+  name                  = "${var.cluster_name}-eks-cluster-role"
+  force_detach_policies = true
 
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "eks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-POLICY
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"
+        ]
+      }
+    ]
+  })
 
   tags = var.tags
 }
 
+locals {
+  eks_cluster_role_base_policies = {
+    cluster_policy = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  }
+  eks_cluster_role_auto_mode_policies = {
+    compute_policy    = "arn:aws:iam::aws:policy/AmazonEKSComputePolicy"
+    storage_policy    = "arn:aws:iam::aws:policy/AmazonEKSBlockStoragePolicy"
+    elb_policy        = "arn:aws:iam::aws:policy/AmazonEKSLoadBalancingPolicy"
+    networking_policy = "arn:aws:iam::aws:policy/AmazonEKSNetworkingPolicy"
+  }
+}
+
 resource "aws_iam_role_policy" "eks_cluster_kms_key" {
   name = "${var.cluster_name}-eks-cluster-kms"
-  role = aws_iam_role.eks_role.id
+  role = aws_iam_role.eks_cluster_role.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -39,14 +53,43 @@ resource "aws_iam_role_policy" "eks_cluster_kms_key" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.eks_role.name
+resource "aws_iam_role_policy_attachment" "eks_cluster_policies" {
+  for_each   = var.enable_eks_auto_mode ? merge(local.eks_cluster_role_base_policies, local.eks_cluster_role_auto_mode_policies) : local.eks_cluster_role_base_policies
+  policy_arn = each.value
+  role       = aws_iam_role.eks_cluster_role.name
 }
 
-resource "aws_iam_role_policy_attachment" "eks_service_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  role       = aws_iam_role.eks_role.name
+resource "aws_iam_role" "eks_node_role" {
+  count                 = var.enable_eks_auto_mode && var.eks_auto_mode_node_role_arn == "" ? 1 : 0
+  name                  = "${var.cluster_name}-eks-node-role"
+  force_detach_policies = true
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_role_minimal_policy" {
+  count      = var.enable_eks_auto_mode && var.eks_auto_mode_node_role_arn == "" ? 1 : 0
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodeMinimalPolicy"
+  role       = aws_iam_role.eks_node_role[*].name
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_role_ecr_policy" {
+  count      = var.enable_eks_auto_mode && var.eks_auto_mode_node_role_arn == "" ? 1 : 0
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly"
+  role       = aws_iam_role.eks_node_role[*].name
 }
 
 resource "aws_kms_key" "eks_key" {
@@ -69,7 +112,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   # checkov:skip=CKV_AWS_39: Disabling public access to EKS enpoint is dependant on user
   version  = var.eks_version == "" ? null : var.eks_version
   name     = var.cluster_name
-  role_arn = aws_iam_role.eks_role.arn
+  role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
     subnet_ids              = var.subnet_ids
@@ -77,6 +120,46 @@ resource "aws_eks_cluster" "eks_cluster" {
     endpoint_public_access  = var.enable_public_access
     public_access_cidrs     = var.enable_public_access == true ? var.public_cidrs : null
     security_group_ids      = var.security_group_ids
+  }
+
+  access_config {
+    authentication_mode                         = var.authentication_mode
+    bootstrap_cluster_creator_admin_permissions = var.bootstrap_cluster_creator_admin_permissions
+  }
+
+  bootstrap_self_managed_addons = var.enable_eks_auto_mode ? false : var.bootstrap_self_managed_addons
+
+  dynamic "compute_config" {
+    for_each = var.enable_eks_auto_mode ? [0] : []
+    content {
+      enabled       = var.enable_eks_auto_mode
+      node_pools    = var.eks_auto_mode_node_pools
+      node_role_arn = var.enable_eks_auto_mode && var.eks_auto_mode_node_role_arn == "" ? aws_iam_role.eks_node_role[*].arn : var.eks_auto_mode_node_role_arn
+    }
+  }
+
+  # this needs to be enabled when auto mode is enabled
+  kubernetes_network_config {
+
+    dynamic "elastic_load_balancing" {
+      for_each = var.enable_eks_auto_mode ? [0] : []
+      content {
+        enabled = true
+      }
+    }
+
+    service_ipv4_cidr = var.eks_networking_service_ipv4_cidr
+    ip_family         = var.eks_networking_ip_family
+  }
+
+  # this needs to be enabled when auto mode is enabled
+  dynamic "storage_config" {
+    for_each = var.enable_eks_auto_mode ? [0] : []
+    content {
+      block_storage {
+        enabled = true
+      }
+    }
   }
 
   enabled_cluster_log_types = var.eks_log_types
@@ -88,14 +171,16 @@ resource "aws_eks_cluster" "eks_cluster" {
     resources = ["secrets"]
   }
 
-  # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
-  # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
-  depends_on = [
-    aws_iam_role_policy_attachment.eks_cluster_policy,
-    aws_iam_role_policy_attachment.eks_service_policy,
-  ]
+  upgrade_policy {
+    support_type = var.upgrade_policy_support_type
+  }
 
   tags = var.tags
+
+  # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_cluster_policies
+  ]
 }
 
 data "tls_certificate" "eks_oidc" {
